@@ -166,11 +166,16 @@ class RoomsController < ApplicationController
     # Join the user in and start the meeting.
     opts = default_meeting_options
     opts[:user_is_moderator] = true
+    opts[:voice_bridge] = @room.voice_bridge_nr
+
 
     # Include the user's choices for the room settings
     @room_settings = JSON.parse(@room[:room_settings])
     opts[:mute_on_start] = room_setting_with_config("muteOnStart")
     opts[:require_moderator_approval] = room_setting_with_config("requireModeratorApproval")
+
+    # Hack allow and start recording for rooms with names ending in _recording
+    opts[:meeting_recorded] = @room.name.end_with?("_recording") ? true : false
 
     begin
       redirect_to join_path(@room, current_user.name, opts, current_user.uid)
